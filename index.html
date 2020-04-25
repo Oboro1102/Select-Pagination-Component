@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Select Pagination Component" />
+    <meta name="author" content="ツキノリュウ" />
+    <title>Select Pagination Component</title>
+    <link href="css/bootstrap-reboot.min.css" rel="stylesheet" type="text/css" />
+    <link href="css/main.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <section class="content-wrap">
+        <h1 class="section__title">Select Pagination Component</h1>
+        <div class="pagination">
+            <div class="demo">
+                <div class="demo__item" v-for="(item, index) in currentPageData" :key="index">
+                    <img :src="item.picture.large" alt="photo">
+                    <h6>{{item.name.first}} {{item.name.last}}</h6>
+                </div>
+            </div>
+            <pagination :page-data="pageData" :per-page-case="pageCase" @get-page-data="getCurrentData"
+                v-if="pageData.flat().length > pageCase && currentPageData.length > 0" />
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        const pagination = {
+            template:
+                `
+                <div class="pagenavi">
+                    <div class="pagenavi__control">
+                        <button class="pagenavi__control__previous" @click="pagePrevious">
+                            <svg class="pagenavi__control__previous__svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24.249 34.769">
+                                <g transform="translate(-208.491 -303.076)">
+                                    <line y1="5.996" x2="20.874" transform="translate(225.875 335.22) rotate(-135)" />
+                                    <line x2="20.874" y2="5.996" transform="translate(211.115 320.461) rotate(-45)" />
+                                </g>
+                            </svg>
+                        </button>
+                        <select name="pagination" class="pagenavi__control__select" @change="jumpToPage(currentPage)" v-model="currentPage">
+                            <option v-for="(item, index) in pageData" :key="index" :value="index + 1">page of {{index + 1}}</option>
+                        </select>
+                        <button class="pagenavi__control__next" @click="pageNext">
+                            <svg class="pagenavi__control__previous__svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24.249 34.769">
+                                <g transform="translate(232.74 337.845) rotate(180)">
+                                    <line y1="5.996" x2="20.874" transform="translate(225.875 335.22) rotate(-135)" />
+                                    <line x2="20.874" y2="5.996" transform="translate(211.115 320.461) rotate(-45)" />
+                                </g>
+                            </svg>                        
+                        </button>
+                    </div>
+                    <div class="pagenavi__info">Now is {{caseStart}} - {{caseEnd}}, total {{totalCase}} item.</div>
+                </div>
+            `,
+            props: {
+                pageData: {
+                    type: Array
+                },
+                perPageCase: {
+                    type: Number
+                }
+            },
+            data() {
+                return {
+                    currentPage: 1 // default page
+                };
+            },
+            computed: {
+                caseStart() {
+                    return this.currentPage * this.perPageCase - this.perPageCase + 1;
+                },
+                caseEnd() {
+                    let pageMaxCase = this.currentPage * this.perPageCase,
+                        pageLastCase = this.pageData[this.currentPage - 1].length;
+
+                    return pageLastCase !== pageMaxCase ? pageMaxCase - this.perPageCase + pageLastCase : pageMaxCase;
+                },
+                totalCase() {
+                    return this.pageData.flat().length;
+                },
+            },
+            methods: {
+                jumpToPage(value) {
+                    this.currentPage = value;
+                    window.scroll({
+                        top: 0,
+                    });
+                    this.$emit('get-page-data', this.pageData[value - 1]);
+                },
+                pagePrevious() {
+                    if (this.currentPage <= 1) {
+                        this.currentPage = 1;
+                    } else {
+                        this.currentPage--;
+                    }
+                    window.scroll({
+                        top: 0,
+                    });
+                    this.$emit('get-page-data', this.pageData[this.currentPage - 1]);
+                },
+                pageNext() {
+                    if (this.currentPage >= this.pageData.length) {
+                        this.currentPage = this.pageData.length;
+                    } else {
+                        this.currentPage++;
+                    }
+                    window.scroll({
+                        top: 0,
+                    });
+                    this.$emit('get-page-data', this.pageData[this.currentPage - 1]);
+                }
+            },
+        };
+
+        const vm = new Vue({
+            el: '.pagination',
+            components: {
+                'pagination': pagination,
+            },
+            data() {
+                return {
+                    totalData: [],
+                    pageCase: 20,
+                    pageData: [],
+                    currentPageData: []
+                }
+            },
+            methods: {
+                assignData() {
+                    let dataSplitCount = 0;
+
+                    while (dataSplitCount < this.totalData.length) {
+                        this.pageData.push(
+                            this.totalData.slice(dataSplitCount, (dataSplitCount += this.pageCase))
+                        );
+                    }
+                },
+                demoData() {
+                    const url = 'https://randomuser.me/api/?results=50', // for data demo, use random user generator API
+                        vm = this;
+                    axios.get(url).then((response) => {
+                        vm.totalData = response.data.results;
+                        // assign data
+                        vm.assignData();
+                        // set page 1 data
+                        vm.currentPageData = vm.pageData[0];
+                    });
+                },
+                getCurrentData($event) { // receive page data
+                    this.currentPageData = $event;
+                },
+            },
+            created() {
+                this.demoData();
+            },
+        });
+    </script>
+</body>
+
+</html>
