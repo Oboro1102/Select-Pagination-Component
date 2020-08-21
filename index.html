@@ -7,14 +7,18 @@
     <meta name="description" content="Select Pagination Component" />
     <meta name="author" content="ツキノリュウ" />
     <title>Select Pagination Component</title>
+    <link href='https://css.gg/spinner-alt.css' rel='stylesheet'>
     <link href="css/bootstrap-reboot.min.css" rel="stylesheet" type="text/css" />
     <link href="css/main.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
-    <section class="content-wrap">
+    <main class="content-wrap">
         <h1 class="section__title">Select Pagination Component</h1>
-        <div class="pagination">
+        <section class="pagination">
+            <div class="loading" v-if="isLoading">
+                <i class="gg-spinner-alt"></i>
+            </div>
             <div class="demo">
                 <div class="demo__item" v-for="(item, index) in currentPageData" :key="index">
                     <img :src="item.picture.large" alt="photo">
@@ -23,8 +27,8 @@
             </div>
             <pagination :page-data="pageData" :per-page-case="pageCase" @get-page-data="getCurrentData"
                 v-if="pageData.flat().length > pageCase && currentPageData.length > 0" />
-        </div>
-    </section>
+        </section>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -85,33 +89,24 @@
                 },
             },
             methods: {
-                jumpToPage(value) {
-                    this.currentPage = value;
+                scrollToTop() {
                     window.scroll({
                         top: 0,
                     });
+                },
+                jumpToPage(value) {
+                    this.currentPage = value;
+                    this.scrollToTop();
                     this.$emit('get-page-data', this.pageData[value - 1]);
                 },
                 pagePrevious() {
-                    if (this.currentPage <= 1) {
-                        this.currentPage = 1;
-                    } else {
-                        this.currentPage--;
-                    }
-                    window.scroll({
-                        top: 0,
-                    });
+                    this.currentPage <= 1 ? this.currentPage = 1 : this.currentPage -= 1;
+                    this.scrollToTop();
                     this.$emit('get-page-data', this.pageData[this.currentPage - 1]);
                 },
                 pageNext() {
-                    if (this.currentPage >= this.pageData.length) {
-                        this.currentPage = this.pageData.length;
-                    } else {
-                        this.currentPage++;
-                    }
-                    window.scroll({
-                        top: 0,
-                    });
+                    this.currentPage >= this.pageData.length ? this.currentPage = this.pageData.length : this.currentPage += 1;
+                    this.scrollToTop();
                     this.$emit('get-page-data', this.pageData[this.currentPage - 1]);
                 }
             },
@@ -124,6 +119,7 @@
             },
             data() {
                 return {
+                    isLoading: false,
                     totalData: [],
                     pageCase: 20,
                     pageData: [],
@@ -143,12 +139,18 @@
                 demoData() {
                     const url = 'https://randomuser.me/api/?results=50', // for data demo, use random user generator API
                         vm = this;
-                    axios.get(url).then((response) => {
+                    vm.isLoading = true;
+
+                    axios.get(url).then(response => {
                         vm.totalData = response.data.results;
                         // assign data
                         vm.assignData();
                         // set page 1 data
                         vm.currentPageData = vm.pageData[0];
+                        vm.isLoading = false;
+                    }).catch(error => {
+                        console.log(error);
+                        alert('Somthing go wrong, please retry later.');
                     });
                 },
                 getCurrentData($event) { // receive page data
