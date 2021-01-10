@@ -147,7 +147,9 @@
                         vm.assignData();
                         // set page 1 data
                         vm.currentPageData = vm.pageData[0];
-                        vm.isLoading = false;
+                        vm.$nextTick(() => {
+                            vm.isLoading = false;
+                        });
                     }).catch(error => {
                         console.log(error);
                         alert('Somthing go wrong, please retry later.');
