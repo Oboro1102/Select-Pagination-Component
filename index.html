@@ -26,7 +26,7 @@
                 </div>
             </div>
             <pagination :page-data="pageData" :per-page-case="pageCase" @get-page-data="getCurrentData"
-                v-if="pageData.flat().length > pageCase && currentPageData.length > 0" />
+                @call-loading="callLoading" v-if="pageData.flat().length > pageCase && currentPageData.length > 0" />
         </section>
     </main>
 
@@ -98,16 +98,19 @@
                     this.currentPage = value;
                     this.scrollToTop();
                     this.$emit('get-page-data', this.pageData[value - 1]);
+                    this.$emit('call-loading', true);
                 },
                 pagePrevious() {
                     this.currentPage <= 1 ? this.currentPage = 1 : this.currentPage -= 1;
                     this.scrollToTop();
                     this.$emit('get-page-data', this.pageData[this.currentPage - 1]);
+                    this.$emit('call-loading', true);
                 },
                 pageNext() {
                     this.currentPage >= this.pageData.length ? this.currentPage = this.pageData.length : this.currentPage += 1;
                     this.scrollToTop();
                     this.$emit('get-page-data', this.pageData[this.currentPage - 1]);
+                    this.$emit('call-loading', true);
                 }
             },
         };
@@ -137,8 +140,9 @@
                     }
                 },
                 demoData() {
-                    const url = 'https://randomuser.me/api/?results=50', // for data demo, use random user generator API
-                        vm = this;
+                    const url = 'https://randomuser.me/api/?results=50'; // for data demo, use random user generator API
+                    const vm = this;
+
                     vm.isLoading = true;
 
                     axios.get(url).then(response => {
@@ -158,6 +162,16 @@
                 getCurrentData($event) { // receive page data
                     this.currentPageData = $event;
                 },
+                callLoading($event) { // set loading screen
+                    const vm = this;
+
+                    vm.isLoading = $event;
+                    vm.$nextTick(() => {
+                        setTimeout(() => {
+                            vm.isLoading = false
+                        }, 1000);
+                    });
+                }
             },
             created() {
                 this.demoData();
