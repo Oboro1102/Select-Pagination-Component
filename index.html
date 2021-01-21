@@ -38,7 +38,7 @@
                 `
                 <div class="pagenavi">
                     <div class="pagenavi__control">
-                        <button class="pagenavi__control__previous" @click="pagePrevious">
+                        <button class="pagenavi__control__previous" @click="pagePrevious"  v-if="currentPage !== 1">
                             <svg class="pagenavi__control__previous__svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24.249 34.769">
                                 <g transform="translate(-208.491 -303.076)">
                                     <line y1="5.996" x2="20.874" transform="translate(225.875 335.22) rotate(-135)" />
@@ -49,7 +49,7 @@
                         <select name="pagination" class="pagenavi__control__select" @change="jumpToPage(currentPage)" v-model="currentPage">
                             <option v-for="(item, index) in pageData" :key="index" :value="index + 1">page of {{index + 1}}</option>
                         </select>
-                        <button class="pagenavi__control__next" @click="pageNext">
+                        <button class="pagenavi__control__next" @click="pageNext" v-if="currentPage !== pageData.length">
                             <svg class="pagenavi__control__previous__svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24.249 34.769">
                                 <g transform="translate(232.74 337.845) rotate(180)">
                                     <line y1="5.996" x2="20.874" transform="translate(225.875 335.22) rotate(-135)" />
