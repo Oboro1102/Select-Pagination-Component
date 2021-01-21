@@ -16,10 +16,10 @@
     <main class="content-wrap">
         <h1 class="section__title">Select Pagination Component</h1>
         <section class="pagination">
-            <div class="loading" v-if="isLoading">
-                <i class="gg-spinner-alt"></i>
-            </div>
             <div class="demo">
+                <div class="loading" v-if="isLoading">
+                    <i class="gg-spinner-alt"></i>
+                </div>
                 <div class="demo__item" v-for="(item, index) in currentPageData" :key="index">
                     <img :src="item.picture.large" alt="photo">
                     <h6>{{item.name.first}} {{item.name.last}}</h6>
